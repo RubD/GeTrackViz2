@@ -6,4 +6,6 @@
 - cowplot
 
 ## installation 
+```R
 devtools::install_github('RubD/GeTrackViz2')
+```
