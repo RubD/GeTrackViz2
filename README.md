@@ -16,3 +16,7 @@ devtools::install_github('RubD/GeTrackViz2')
 ```
 
 ## Usage
+
+### create gene model
+
+### create tracks
