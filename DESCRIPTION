@@ -1,0 +1,10 @@
+Package: GeTrackViz2
+Title: What the Package Does (one line, title case)
+Version: 0.0.0.9000
+Authors@R: person("Ruben", "Dries", email = "rubendries@gmail.com", role = c("aut", "cre"))
+Description: Create genomic track visualizations
+Depends: R (>= 3.4.0)
+License: What license is it under?
+Encoding: UTF-8
+LazyData: true
+RoxygenNote: 6.0.1
