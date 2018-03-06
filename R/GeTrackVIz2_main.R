@@ -717,6 +717,7 @@ plot_genome <- function(transcript, exon, five_UTR, three_UTR,
                         mychr = 'chr14', start_loc = 61100000 , end_loc = 61195000,
                         breaks_wanted = 4,
                         show_partial_overlap = T, marginvec_mm = c(0,0,0,0),
+                        exon_size = 2, UTR_size = 1.5,
                         show_labels = T, print_plot = T) {
 
 
@@ -858,10 +859,10 @@ plot_genome <- function(transcript, exon, five_UTR, three_UTR,
   gene_model_pl <- gene_model_pl + annotate('text', x = subset_transcript$gene_name_center, y = subset_transcript$ystart+3, label = subset_transcript$name, size = 4)
 
   # exon coord
-  gene_model_pl <- gene_model_pl + geom_segment(data = subset_exon, aes(x = xstart, y = ystart, xend = xend, yend = yend), size = 1.5)
+  gene_model_pl <- gene_model_pl + geom_segment(data = subset_exon, aes(x = xstart, y = ystart, xend = xend, yend = yend), size = exon_size)
   # UTR coord
-  gene_model_pl <- gene_model_pl + geom_segment(data = subset_five_UTR, aes(x = xstart, y = ystart, xend = xend, yend = yend), size = 1.5, color = 'grey')
-  gene_model_pl <- gene_model_pl + geom_segment(data = subset_three_UTR, aes(x = xstart, y = ystart, xend = xend, yend = yend), size = 1.5, color = 'grey')
+  gene_model_pl <- gene_model_pl + geom_segment(data = subset_five_UTR, aes(x = xstart, y = ystart, xend = xend, yend = yend), size = UTR_size, color = 'grey')
+  gene_model_pl <- gene_model_pl + geom_segment(data = subset_three_UTR, aes(x = xstart, y = ystart, xend = xend, yend = yend), size = UTR_size, color = 'grey')
 
   gene_model_pl <- gene_model_pl + scale_x_continuous( expand = c(0, 0), limits = c(start_loc, end_loc), breaks = calculated_breaks, labels = mylabels)
   gene_model_pl <- gene_model_pl + ylim(c(0, max_y))
@@ -957,6 +958,7 @@ Genomic_tracks_plot <- function(format_vec, figure_list, uniq_name_vec, color_ve
                                 model_show_partial_overlap = T,
                                 transcript, exon, five_UTR, three_UTR,
                                 breaks_wanted = 4,  label_size = 10,
+                                exon_size = 2, UTR_size = 1.5,
                                 # RNA bedgraph specific params
                                 rna_bdg_binsize = 100,
                                 rna_bdg_y_title = 'RPM/bp',
@@ -1122,6 +1124,7 @@ Genomic_tracks_plot <- function(format_vec, figure_list, uniq_name_vec, color_ve
                              mychr = mychr, start_loc = start_loc , end_loc = end_loc,
                              breaks_wanted = breaks_wanted,
                              show_partial_overlap = model_show_partial_overlap, marginvec_mm = marginvec_mm,
+                             exon_size = exon_size, UTR_size = UTR_size,
                              show_labels = show_labels, print_plot = print_plot)
 
     } else if(plotformat == 'coord') {
