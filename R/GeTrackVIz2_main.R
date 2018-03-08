@@ -38,6 +38,7 @@ plot_RNA_bedgraph <- function(rna_bdg, name_rna_bdg, color_rna_bdg, mychr, start
                               make_minus_strand_negative = T,
                               forced_y_min = NULL, forced_y_max = NULL,
                               axis_line_size = 0.2, marginvec_mm = c(0,0,0,0),
+                              use_barplot = F, alpha_fill = 0.7,
                               show_labels = F, print_plot = F) {
 
 
@@ -148,8 +149,19 @@ plot_RNA_bedgraph <- function(rna_bdg, name_rna_bdg, color_rna_bdg, mychr, start
 
 
     pl <- ggplot()
-    pl <- pl + geom_bar(data = overlap_plus, aes(x = region_center, y = V1), stat = 'identity', width = 1, color = plus_color)
-    pl <- pl + geom_bar(data = overlap_minus, aes(x = region_center, y = V1), stat = 'identity', width = 1, color = minus_color)
+    # barplot vs lineplot
+    if(use_barplot == TRUE) {
+      pl <- pl + geom_bar(data = overlap_plus, aes(x = region_center, y = V1), stat = 'identity', width = 1, color = plus_color)
+      pl <- pl + geom_bar(data = overlap_minus, aes(x = region_center, y = V1), stat = 'identity', width = 1, color = minus_color)
+
+    } else {
+      pl <- pl + geom_line(data = overlap_plus, aes(x = region_center, y = V1), stat = 'identity', color = plus_color)
+      pl <- pl + geom_ribbon(data = overlap_plus, aes(x = region_center, ymax = V1, ymin = 0), fill = plus_color, alpha = alpha_fill)
+
+      pl <- pl + geom_line(data = overlap_minus, aes(x = region_center, y = V1), stat = 'identity', color = minus_color)
+      pl <- pl + geom_ribbon(data = overlap_minus, aes(x = region_center, ymax = 0, ymin = V1), fill = minus_color, alpha = alpha_fill)
+    }
+
     pl <- pl + geom_hline(yintercept = 0, color = 'black', size = 0.5)
     pl <- pl + theme_bw() + theme(panel.background = element_blank(),
                                   panel.border = element_blank(),
@@ -242,7 +254,14 @@ plot_RNA_bedgraph <- function(rna_bdg, name_rna_bdg, color_rna_bdg, mychr, start
 
 
     pl <- ggplot()
-    pl <- pl + geom_bar(data = overlap_plus, aes(x = region_center, y = V1), stat = 'identity', width = 1, color = plus_color)
+    # choose barplot vs lineplot
+    if(use_barplot == TRUE) {
+      pl <- pl + geom_bar(data = overlap_plus, aes(x = region_center, y = V1), stat = 'identity', width = 1, color = plus_color)
+    } else {
+      pl <- pl + geom_line(data = overlap_plus, aes(x = region_center, y = V1), stat = 'identity', color = plus_color)
+      pl <- pl + geom_ribbon(data = overlap_plus, aes(x = region_center, ymax = V1, ymin = 0), fill = plus_color, alpha = alpha_fill)
+    }
+
     pl <- pl + geom_hline(yintercept = 0, color = 'black', size = 0.5)
     pl <- pl + theme_bw() + theme(panel.background = element_blank(),
                                   panel.border = element_blank(),
@@ -968,6 +987,7 @@ Genomic_tracks_plot <- function(format_vec, figure_list, uniq_name_vec, color_ve
                                 rna_bdg_counts_col = 'RPKM', rna_bdg_strand_col = NA,
                                 rna_min_strand_sign = '-', rna_plus_strand_sign = '+',
                                 rna_make_minus_strand_negative = F,
+                                rna_use_barplot = F, rna_alpha_fill = 0.7,
                                 # bedgraph specific params
                                 bdg_binsize = 100,
                                 bdg_y_title = 'RPM/bp',
