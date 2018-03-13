@@ -39,6 +39,7 @@ plot_RNA_bedgraph <- function(rna_bdg, name_rna_bdg, color_rna_bdg, mychr, start
                               forced_y_min = NULL, forced_y_max = NULL,
                               axis_line_size = 0.2, marginvec_mm = c(0,0,0,0),
                               use_barplot = F, alpha_fill = 0.7,
+                              reverse_strand = FALSE,
                               show_labels = F, print_plot = F) {
 
 
@@ -143,6 +144,15 @@ plot_RNA_bedgraph <- function(rna_bdg, name_rna_bdg, color_rna_bdg, mychr, start
     my_y_labels <- round(y_breaks, digits = 1)
 
 
+    ## Reverse strand ##
+    if(reverse_strand == TRUE) {
+      my_y_min = -my_y_min
+      my_y_max = -my_y_max
+      overlap_plus[, V1 := -V1]
+      overlap_minus[, V1 := -V1]
+    }
+
+
 
     plus_color = color_rna_bdg[[1]]
     minus_color = color_rna_bdg[[2]]
@@ -151,15 +161,32 @@ plot_RNA_bedgraph <- function(rna_bdg, name_rna_bdg, color_rna_bdg, mychr, start
     pl <- ggplot()
     # barplot vs lineplot
     if(use_barplot == TRUE) {
-      pl <- pl + geom_bar(data = overlap_plus, aes(x = region_center, y = V1), stat = 'identity', width = 1, color = plus_color)
-      pl <- pl + geom_bar(data = overlap_minus, aes(x = region_center, y = V1), stat = 'identity', width = 1, color = minus_color)
+
+      if(reverse_strand == TRUE) {
+        pl <- pl + geom_bar(data = overlap_plus, aes(x = rev(region_center), y = V1), stat = 'identity', width = 1, color = plus_color)
+        pl <- pl + geom_bar(data = overlap_minus, aes(x = rev(region_center), y = V1), stat = 'identity', width = 1, color = minus_color)
+
+      } else {
+        pl <- pl + geom_bar(data = overlap_plus, aes(x = region_center, y = V1), stat = 'identity', width = 1, color = plus_color)
+        pl <- pl + geom_bar(data = overlap_minus, aes(x = region_center, y = V1), stat = 'identity', width = 1, color = minus_color)
+
+      }
 
     } else {
-      pl <- pl + geom_line(data = overlap_plus, aes(x = region_center, y = V1), stat = 'identity', color = plus_color)
-      pl <- pl + geom_ribbon(data = overlap_plus, aes(x = region_center, ymax = V1, ymin = 0), fill = plus_color, alpha = alpha_fill)
 
-      pl <- pl + geom_line(data = overlap_minus, aes(x = region_center, y = V1), stat = 'identity', color = minus_color)
-      pl <- pl + geom_ribbon(data = overlap_minus, aes(x = region_center, ymax = 0, ymin = V1), fill = minus_color, alpha = alpha_fill)
+      if(reverse_strand == TRUE) {
+        pl <- pl + geom_line(data = overlap_plus, aes(x = rev(region_center), y = V1), stat = 'identity', color = plus_color)
+        pl <- pl + geom_ribbon(data = overlap_plus, aes(x = rev(region_center), ymax = V1, ymin = 0), fill = plus_color, alpha = alpha_fill)
+        pl <- pl + geom_line(data = overlap_minus, aes(x = rev(region_center), y = V1), stat = 'identity', color = minus_color)
+        pl <- pl + geom_ribbon(data = overlap_minus, aes(x = rev(region_center), ymax = 0, ymin = V1), fill = minus_color, alpha = alpha_fill)
+
+      } else {
+        pl <- pl + geom_line(data = overlap_plus, aes(x = region_center, y = V1), stat = 'identity', color = plus_color)
+        pl <- pl + geom_ribbon(data = overlap_plus, aes(x = region_center, ymax = V1, ymin = 0), fill = plus_color, alpha = alpha_fill)
+        pl <- pl + geom_line(data = overlap_minus, aes(x = region_center, y = V1), stat = 'identity', color = minus_color)
+        pl <- pl + geom_ribbon(data = overlap_minus, aes(x = region_center, ymax = 0, ymin = V1), fill = minus_color, alpha = alpha_fill)
+      }
+
     }
 
     pl <- pl + geom_hline(yintercept = 0, color = 'black', size = 0.5)
@@ -256,10 +283,23 @@ plot_RNA_bedgraph <- function(rna_bdg, name_rna_bdg, color_rna_bdg, mychr, start
     pl <- ggplot()
     # choose barplot vs lineplot
     if(use_barplot == TRUE) {
-      pl <- pl + geom_bar(data = overlap_plus, aes(x = region_center, y = V1), stat = 'identity', width = 1, color = plus_color)
+
+      if(reverse_strand == TRUE) {
+        pl <- pl + geom_bar(data = overlap_plus, aes(x = rev(region_center), y = V1), stat = 'identity', width = 1, color = plus_color)
+      } else {
+        pl <- pl + geom_bar(data = overlap_plus, aes(x = region_center, y = V1), stat = 'identity', width = 1, color = plus_color)
+      }
+
     } else {
-      pl <- pl + geom_line(data = overlap_plus, aes(x = region_center, y = V1), stat = 'identity', color = plus_color)
-      pl <- pl + geom_ribbon(data = overlap_plus, aes(x = region_center, ymax = V1, ymin = 0), fill = plus_color, alpha = alpha_fill)
+
+      if(reverse_strand == TRUE) {
+        pl <- pl + geom_line(data = overlap_plus, aes(x = rev(region_center), y = V1), stat = 'identity', color = plus_color)
+        pl <- pl + geom_ribbon(data = overlap_plus, aes(x = rev(region_center), ymax = V1, ymin = 0), fill = plus_color, alpha = alpha_fill)
+      } else {
+        pl <- pl + geom_line(data = overlap_plus, aes(x = region_center, y = V1), stat = 'identity', color = plus_color)
+        pl <- pl + geom_ribbon(data = overlap_plus, aes(x = region_center, ymax = V1, ymin = 0), fill = plus_color, alpha = alpha_fill)
+      }
+
     }
 
     pl <- pl + geom_hline(yintercept = 0, color = 'black', size = 0.5)
@@ -326,6 +366,7 @@ plot_bedgraph <- function(bdg, name_bdg, color_bdg,
                           chrom_col = 'chr', start_col = 'start', end_col = 'end', counts_col = 'RPKM',
                           forced_y_min = NULL, forced_y_max = NULL,
                           axis_line_size = 0.2, marginvec_mm = c(0,0,0,0),
+                          reverse_strand = FALSE,
                           show_labels = F, print_plot = F) {
 
   # subset of bedgraph
@@ -388,7 +429,11 @@ plot_bedgraph <- function(bdg, name_bdg, color_bdg,
 
   # create plot
   pl <- ggplot()
-  pl <- pl + geom_bar(data = overlap, aes(x = region_center, y = V1), stat = 'identity', width = 1, color = color_bdg)
+  if(reverse_strand == TRUE) {
+    pl <- pl + geom_bar(data = overlap, aes(x = rev(region_center), y = V1), stat = 'identity', width = 1, color = color_bdg)
+  } else {
+    pl <- pl + geom_bar(data = overlap, aes(x = region_center, y = V1), stat = 'identity', width = 1, color = color_bdg)
+  }
   pl <- pl + theme_bw() + theme(panel.background = element_blank(),
                                 panel.border = element_blank(),
                                 axis.line = element_line(color = 'black', size = axis_line_size),
@@ -442,6 +487,7 @@ plot_loops <- function(bedpe, name_bedpe, color_bedpe,
                        chrom_col = 'chr', start_col = 'start', end_col = 'end',
                        show_partial_overlap = T,
                        axis_line_size = 0.2, marginvec_mm = c(0,0,0,0),
+                       reverse_strand = FALSE,
                        show_labels = F, print_plot = F) {
 
 
@@ -525,6 +571,11 @@ plot_loops <- function(bedpe, name_bedpe, color_bedpe,
                                         plot.margin=unit(marginvec_mm,"mm"))
   int_pl <- int_pl + labs(list(x = NULL, y = full_title))
 
+  # start: not yet tested #
+  if(reverse_strand == TRUE) {
+    int_pl <- int_pl + scale_x_reverse()
+  }
+  # stop: not yet tested #
 
   if(print_plot == T) print(int_pl)
 
@@ -568,6 +619,7 @@ plot_bed <- function(bed, name_bed, color_bed, size_bed,
                      show_partial_overlap = T,
                      same_y_level = T,
                      axis_line_size = 1, marginvec_mm = c(0,0,0,0),
+                     reverse_strand = FALSE,
                      show_labels = F, print_plot = F) {
 
 
@@ -638,6 +690,12 @@ plot_bed <- function(bed, name_bed, color_bed, size_bed,
                                         plot.margin=unit(marginvec_mm,"mm"))
   bed_pl <- bed_pl + labs(list(x = NULL, y = full_title))
 
+  # start: not yet tested #
+  if(reverse_strand == TRUE) {
+    bed_pl <- bed_pl + scale_x_reverse()
+  }
+  # stop: not yet tested #
+
   if(print_plot == T) print(bed_pl)
 
   return(bed_pl)
@@ -669,6 +727,7 @@ plot_bed <- function(bed, name_bed, color_bed, size_bed,
 plot_coord <- function(mychr, start_loc, end_loc,
                        breaks_wanted = 4, label_size = 6,
                        axis_line_size = 0.5, marginvec_mm = c(0,0,0,0),
+                       reverse_strand = FALSE,
                        show_labels = T, print_plot = F) {
 
   # create empty data.frame
@@ -679,8 +738,16 @@ plot_coord <- function(mychr, start_loc, end_loc,
 
   if(show_labels == T) {
     mylabels <- paste0(round(calculated_breaks/1000, digits = 0), 'kb')
+    if(reverse_strand == TRUE) {
+      mylabels <- rev(mylabels)
+    }
+    print(mylabels)
   } else {
     mylabels <- rep('', length(calculated_breaks))
+    if(reverse_strand == TRUE) {
+      mylabels <- rev(mylabels)
+    }
+    print(mylabels)
   }
 
   coord_pl <- ggplot()
@@ -737,6 +804,7 @@ plot_genome <- function(transcript, exon, five_UTR, three_UTR,
                         breaks_wanted = 4,
                         show_partial_overlap = T, marginvec_mm = c(0,0,0,0),
                         exon_size = 2, UTR_size = 1.5,
+                        reverse_strand = FALSE,
                         show_labels = T, print_plot = T) {
 
 
@@ -896,7 +964,11 @@ plot_genome <- function(transcript, exon, five_UTR, three_UTR,
                                                       plot.margin=unit(marginvec_mm,"mm"))
   gene_model_pl <- gene_model_pl + labs(list(x = NULL, y = 'genes'))
 
-
+  # start: not yet tested #
+  if(reverse_strand == TRUE) {
+    gene_model_pl <- gene_model_pl + scale_x_reverse()
+  }
+  # stop: not yet tested #
 
   if(print_plot == T) print(gene_model_pl)
 
@@ -904,6 +976,7 @@ plot_genome <- function(transcript, exon, five_UTR, three_UTR,
 
 
 }
+
 
 
 
@@ -973,6 +1046,7 @@ plot_genome <- function(transcript, exon, five_UTR, three_UTR,
 Genomic_tracks_plot <- function(format_vec, figure_list, uniq_name_vec, color_vec,
                                 mychr = 'chr14', start_loc = 61100000 , end_loc = 61195000,
                                 coord_axis_line_size = 0.5, marginvec_mm = c(0,0,0,0),
+                                reverse_strand = FALSE,
                                 # gene model
                                 model_show_partial_overlap = T,
                                 transcript, exon, five_UTR, three_UTR,
@@ -1074,7 +1148,8 @@ Genomic_tracks_plot <- function(format_vec, figure_list, uniq_name_vec, color_ve
                                    make_minus_strand_negative = rna_make_minus_strand_negative,
                                    forced_y_min = rna_bdg_forced_y_min_vec, forced_y_max = rna_bdg_forced_y_max_vec,
                                    axis_line_size = rna_bdg_axis_line_size, marginvec_mm = marginvec_mm,
-                                   show_labels = show_labels, print_plot = print_plot)
+                                   show_labels = show_labels, print_plot = print_plot,
+                                   reverse_strand = reverse_strand)
 
 
     }
@@ -1108,6 +1183,7 @@ Genomic_tracks_plot <- function(format_vec, figure_list, uniq_name_vec, color_ve
                                chrom_col = bdg_chrom_col, start_col = bdg_start_col, end_col = bdg_end_col, counts_col = bdg_counts_col,
                                forced_y_min = bdg_forced_y_min, forced_y_max = bdg_forced_y_max,
                                axis_line_size = bdg_axis_line_size, marginvec_mm = marginvec_mm,
+                               reverse_strand = reverse_strand,
                                show_labels = show_labels, print_plot = print_plot)
 
     } else if(plotformat == 'bedpe') {
@@ -1120,6 +1196,7 @@ Genomic_tracks_plot <- function(format_vec, figure_list, uniq_name_vec, color_ve
                             chrom_col = loop_chrom_col, start_col = loop_start_col, end_col = loop_end_col,
                             show_partial_overlap = loop_show_partial_overlap,
                             axis_line_size = loops_axis_line_size, marginvec_mm = marginvec_mm,
+                            reverse_strand = reverse_strand,
                             show_labels = show_labels, print_plot = print_plot)
 
     } else if(plotformat == 'bed') {
@@ -1133,6 +1210,7 @@ Genomic_tracks_plot <- function(format_vec, figure_list, uniq_name_vec, color_ve
                           show_partial_overlap = bed_show_partial_overlap,
                           same_y_level = bed_same_y_level,
                           axis_line_size = bed_axis_line_size, marginvec_mm = marginvec_mm,
+                          reverse_strand = reverse_strand,
                           show_labels = show_labels, print_plot = print_plot)
 
 
@@ -1145,6 +1223,7 @@ Genomic_tracks_plot <- function(format_vec, figure_list, uniq_name_vec, color_ve
                              breaks_wanted = breaks_wanted,
                              show_partial_overlap = model_show_partial_overlap, marginvec_mm = marginvec_mm,
                              exon_size = exon_size, UTR_size = UTR_size,
+                             reverse_strand = reverse_strand,
                              show_labels = show_labels, print_plot = print_plot)
 
     } else if(plotformat == 'coord') {
@@ -1154,6 +1233,7 @@ Genomic_tracks_plot <- function(format_vec, figure_list, uniq_name_vec, color_ve
       newplot <- plot_coord(mychr = mychr, start_loc = start_loc, end_loc = end_loc,
                             breaks_wanted = breaks_wanted, label_size = label_size,
                             axis_line_size = coord_axis_line_size, marginvec_mm = marginvec_mm,
+                            reverse_strand = reverse_strand,
                             show_labels = T, print_plot = print_plot)
 
     } else if(!plotformat %in% c('rna', 'bed', 'bedgraph', 'bedpe', 'model', 'coord')) {
