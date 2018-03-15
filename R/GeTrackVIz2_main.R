@@ -150,6 +150,8 @@ plot_RNA_bedgraph <- function(rna_bdg, name_rna_bdg, color_rna_bdg, mychr, start
       my_y_max = -my_y_max
       overlap_plus[, V1 := -V1]
       overlap_minus[, V1 := -V1]
+      y_breaks = -y_breaks
+      my_y_labels <- round(y_breaks, digits = 1)
     }
 
 
@@ -738,22 +740,28 @@ plot_coord <- function(mychr, start_loc, end_loc,
 
   if(show_labels == T) {
     mylabels <- paste0(round(calculated_breaks/1000, digits = 0), 'kb')
-    if(reverse_strand == TRUE) {
-      mylabels <- rev(mylabels)
-    }
+    #if(reverse_strand == TRUE) {
+    #  mylabels <- rev(mylabels)
+    #}
     print(mylabels)
   } else {
     mylabels <- rep('', length(calculated_breaks))
-    if(reverse_strand == TRUE) {
-      mylabels <- rev(mylabels)
-    }
+    #if(reverse_strand == TRUE) {
+    #  mylabels <- rev(mylabels)
+    #}
     print(mylabels)
   }
 
   coord_pl <- ggplot()
   # transcript length
   coord_pl <- coord_pl + geom_segment(data = df)
-  coord_pl <- coord_pl + scale_x_continuous( expand = c(0, 0), limits = c(start_loc, end_loc), breaks = calculated_breaks, labels = mylabels)
+
+  if(reverse_strand == TRUE) {
+    coord_pl <- coord_pl + scale_x_continuous( expand = c(0, 0), limits = c(end_loc, start_loc), breaks = calculated_breaks, labels = mylabels, trans = 'reverse')
+  } else {
+    coord_pl <- coord_pl + scale_x_continuous( expand = c(0, 0), limits = c(start_loc, end_loc), breaks = calculated_breaks, labels = mylabels)
+  }
+
   coord_pl <- coord_pl + theme_bw() + theme(panel.background = element_blank(),
                                             panel.border = element_blank(),
                                             axis.line = element_line(color = 'black', axis_line_size),
@@ -788,6 +796,10 @@ plot_coord <- function(mychr, start_loc, end_loc,
 #' @param end_loc end location on chromosome
 #' @param breaks_wanted number of breaks on x-axis
 #' @param show_partial_overlap include loops that do not entirely overlap the coordinates
+#' @param y_coord_gene_dist distance between genes
+#' @param y_top_space additional space on top
+#' @param y_genename_space space between gene name and gene model
+#' @param genename_size size of gene name
 #' @param marginvec_mm margin around plot, default = c(0,0,0,0)
 #' @param show_labels boolean: show x-axis lables
 #' @param print_plot boolean: print individual plot
@@ -803,10 +815,15 @@ plot_genome <- function(transcript, exon, five_UTR, three_UTR,
                         mychr = 'chr14', start_loc = 61100000 , end_loc = 61195000,
                         breaks_wanted = 4,
                         show_partial_overlap = T, marginvec_mm = c(0,0,0,0),
-                        exon_size = 2, UTR_size = 1.5,
+                        y_coord_gene_dist = 0.5, y_top_space = 2,
+                        y_genename_space = 1, genename_size = 4,
+                        exon_size = 0.5, UTR_size = 0.5,
                         reverse_strand = FALSE,
                         show_labels = T, print_plot = T) {
 
+
+  ## TO DO ##
+  # if there are only partially overlapping genes, then it does not work: FIX
 
   # UCSC BED format is strict! and first 6 are minimally required
 
@@ -815,22 +832,30 @@ plot_genome <- function(transcript, exon, five_UTR, three_UTR,
   # 1. select transcripts that are within range limits
   colnames(transcript)[1:6] <- c('chr', 'start', 'end', 'name', 'score', 'strand')
 
-  subset_transcript <- transcript[chr == mychr & start >= start_loc & end <= end_loc]
-  selected_transcripts <- unique(subset_transcript[['name']])
 
-  subset_transcript[, c('xstart', 'xend') := list(start, end)]
-  subset_transcript[, c('ystart', 'yend') := list(1:nrow(subset_transcript), 1:nrow(subset_transcript))]
-  subset_transcript[, gene_name_center := round(mean(c(xstart, xend)), digits = 0), by = 1:nrow(subset_transcript)]
+  subset_transcript <- transcript[chr == mychr & start >= start_loc & end <= end_loc]
+
+  if(nrow(subset_transcript) > 0) {
+    selected_transcripts <- unique(subset_transcript[['name']])
+    subset_transcript[, c('xstart', 'xend') := list(start, end)]
+    subset_transcript[, gene_name_center := round(mean(c(xstart, xend)), digits = 0), by = 1:nrow(subset_transcript)]
+  } else {
+    subset_transcript <- NULL
+  }
+
+
+  #cat('1 \n')
 
 
 
   if(show_partial_overlap == TRUE) {
 
     subset_transcript_OnlyStart <- transcript[chr == mychr & start >= start_loc & start <= end_loc]
-    subset_transcript_OnlyStart <- subset_transcript_OnlyStart[!name %in% subset_transcript$name]
+    if(!is.null(subset_transcript)) {
+      subset_transcript_OnlyStart <- subset_transcript_OnlyStart[!name %in% subset_transcript$name]
+    }
     subset_transcript_OnlyStart[, end := end_loc]
     subset_transcript_OnlyStart[, c('xstart', 'xend') := list(start, end)]
-    subset_transcript_OnlyStart[, c('ystart', 'yend') := list(1:nrow(subset_transcript_OnlyStart), 1:nrow(subset_transcript_OnlyStart))]
 
     if(nrow(subset_transcript_OnlyStart) > 0) {
       subset_transcript_OnlyStart[, gene_name_center := round(mean(c(xstart, xend)), digits = 0), by = 1:nrow(subset_transcript_OnlyStart)]
@@ -840,10 +865,11 @@ plot_genome <- function(transcript, exon, five_UTR, three_UTR,
 
 
     subset_transcript_OnlyEnd <- transcript[chr == mychr & end >= start_loc & end <= end_loc]
-    subset_transcript_OnlyEnd <- subset_transcript_OnlyEnd[!name %in% subset_transcript$name]
+    if(!is.null(subset_transcript)) {
+      subset_transcript_OnlyEnd <- subset_transcript_OnlyEnd[!name %in% subset_transcript$name]
+    }
     subset_transcript_OnlyEnd[, start := start_loc]
     subset_transcript_OnlyEnd[, c('xstart', 'xend') := list(start, end)]
-    subset_transcript_OnlyEnd[, c('ystart', 'yend') := list(1:nrow(subset_transcript_OnlyEnd), 1:nrow(subset_transcript_OnlyEnd))]
 
     if(nrow(subset_transcript_OnlyEnd) > 0) {
       subset_transcript_OnlyEnd[, gene_name_center := round(mean(c(xstart, xend)), digits = 0), by = 1:nrow(subset_transcript_OnlyEnd)]
@@ -857,6 +883,49 @@ plot_genome <- function(transcript, exon, five_UTR, three_UTR,
 
   }
 
+  #cat('2 \n')
+
+  setorder(subset_transcript, chr, start, end)
+  subset_transcript_plus <- subset_transcript[strand == '+']
+  subset_transcript_minus <- subset_transcript[strand == '-']
+
+
+  # calculate y-coord for each gene
+  # y-distance between genes and size of exon / UTR
+  # number of start positions can be adjusted
+  plus_rows <- nrow(subset_transcript_plus)
+  minus_rows <- nrow(subset_transcript_minus)
+
+
+  y_dist = y_coord_gene_dist
+
+  if(plus_rows > 0) {
+    plus_y = c(1*y_dist, 4*y_dist)
+    times_plus <- ceiling(plus_rows/(length(plus_y)))
+    plus_starts <- rep(plus_y, times_plus)
+    plus_starts <- plus_starts[1:plus_rows]
+    subset_transcript_plus[, ypos := plus_starts]
+  } else {
+    subset_transcript_plus <- NULL
+  }
+
+  if(minus_rows > 0) {
+    minus_y = c(7*y_dist, 10*y_dist)
+    times_minus <- ceiling(minus_rows/(length(minus_y)))
+    minus_starts <- rep(minus_y, times_minus)
+    minus_starts <- minus_starts[1:minus_rows]
+    subset_transcript_minus[, ypos := minus_starts]
+  } else {
+    subset_transcript_minus <- NULL
+  }
+
+
+  subset_transcript <- rbind(subset_transcript_plus, subset_transcript_minus)
+
+
+  #cat('3 \n')
+
+
 
 
 
@@ -866,6 +935,13 @@ plot_genome <- function(transcript, exon, five_UTR, three_UTR,
 
   subset_exon <- exon[name %in% selected_transcripts]
   subset_exon[, c('xstart', 'xend') := list(start, end)]
+
+  # remove exons that are outside the window
+  subset_exon <- subset_exon[!xend < start_loc]
+  subset_exon <- subset_exon[!start > end_loc]
+
+
+  #cat('4 \n')
 
   if(show_partial_overlap == TRUE) {
 
@@ -879,7 +955,7 @@ plot_genome <- function(transcript, exon, five_UTR, three_UTR,
 
   }
 
-  subset_exon <- merge(subset_exon, subset_transcript[, .(name, ystart, yend)], by = 'name')
+  subset_exon <- merge(subset_exon, subset_transcript[, .(name, ypos)], by = 'name')
 
 
 
@@ -890,6 +966,13 @@ plot_genome <- function(transcript, exon, five_UTR, three_UTR,
   # 5 UTR
   subset_five_UTR <- five_UTR[name %in% selected_transcripts]
   subset_five_UTR[, c('xstart', 'xend') := list(start, end)]
+
+  # remove exons that are outside the window
+  subset_five_UTR <- subset_five_UTR[!xend < start_loc]
+  subset_five_UTR <- subset_five_UTR[!start > end_loc]
+
+
+
 
   if(show_partial_overlap == TRUE) {
 
@@ -903,12 +986,17 @@ plot_genome <- function(transcript, exon, five_UTR, three_UTR,
   }
 
 
-  subset_five_UTR <- merge(subset_five_UTR, subset_transcript[, .(name, ystart, yend)], by = 'name')
+  subset_five_UTR <- merge(subset_five_UTR, subset_transcript[, .(name, ypos)], by = 'name')
 
 
   # three UTR
   subset_three_UTR <- three_UTR[name %in% selected_transcripts]
   subset_three_UTR[, c('xstart', 'xend') := list(start, end)]
+
+  # remove exons that are outside the window
+  subset_three_UTR <- subset_three_UTR[!xend < start_loc]
+  subset_three_UTR <- subset_three_UTR[!start > end_loc]
+
 
   if(show_partial_overlap == TRUE) {
 
@@ -920,7 +1008,7 @@ plot_genome <- function(transcript, exon, five_UTR, three_UTR,
                                       ifelse(xstart >= end_loc, xend,
                                              ifelse(xstart <= end_loc & xend >= end_loc, end_loc, xend)))]
   }
-  subset_three_UTR <- merge(subset_three_UTR, subset_transcript[, .(name, ystart, yend)], by = 'name')
+  subset_three_UTR <- merge(subset_three_UTR, subset_transcript[, .(name, ypos)], by = 'name')
 
 
   # create breaks
@@ -934,24 +1022,36 @@ plot_genome <- function(transcript, exon, five_UTR, three_UTR,
 
 
   # maximum y
-  max_y = max(subset_transcript$ystart)+5
+  max_y = max(subset_transcript$ypos)+y_top_space
 
 
 
-  ## visualization ##
+  ### visualization ###
   gene_model_pl <- ggplot()
 
-  # transcript length
-  gene_model_pl <- gene_model_pl + geom_segment(data = subset_transcript, aes(x = xstart, y = ystart, xend = xend, yend = yend))
-  gene_model_pl <- gene_model_pl + annotate('text', x = subset_transcript$gene_name_center, y = subset_transcript$ystart+3, label = subset_transcript$name, size = 4)
+  ## transcript length ##
+  gene_model_pl <- gene_model_pl + geom_segment(data = subset_transcript, aes(x = xstart, y = ypos, xend = xend, yend = ypos))
+  gene_model_pl <- gene_model_pl + annotate('text', x = subset_transcript$gene_name_center, y = subset_transcript$ypos+y_genename_space, label = subset_transcript$name, size = genename_size)
 
-  # exon coord
-  gene_model_pl <- gene_model_pl + geom_segment(data = subset_exon, aes(x = xstart, y = ystart, xend = xend, yend = yend), size = exon_size)
-  # UTR coord
-  gene_model_pl <- gene_model_pl + geom_segment(data = subset_five_UTR, aes(x = xstart, y = ystart, xend = xend, yend = yend), size = UTR_size, color = 'grey')
-  gene_model_pl <- gene_model_pl + geom_segment(data = subset_three_UTR, aes(x = xstart, y = ystart, xend = xend, yend = yend), size = UTR_size, color = 'grey')
+  ## exon ##
+  gene_model_pl <- gene_model_pl + geom_rect(data = subset_exon, aes(xmin = xstart, ymin = ypos-exon_size, xmax = xend, ymax = ypos+exon_size),fill = 'black' ,color = 'black', size  = 0.5)
 
-  gene_model_pl <- gene_model_pl + scale_x_continuous( expand = c(0, 0), limits = c(start_loc, end_loc), breaks = calculated_breaks, labels = mylabels)
+  ## UTR coord ##
+  if(!is.null(subset_five_UTR)) {
+    gene_model_pl <- gene_model_pl + geom_rect(data = subset_five_UTR, aes(xmin = xstart, ymin = ypos-UTR_size, xmax = xend, ymax = ypos+UTR_size), size = 0.5, fill = 'grey')
+  }
+
+  if(!is.null(subset_three_UTR)) {
+    gene_model_pl <- gene_model_pl + geom_rect(data = subset_three_UTR, aes(xmin = xstart, ymin = ypos-UTR_size, xmax = xend, ymax = ypos+UTR_size), size = 0.5, fill = 'grey')
+  }
+
+
+  if(reverse_strand == TRUE) {
+    gene_model_pl <- gene_model_pl +scale_x_continuous( expand = c(0, 0), limits = c(end_loc, start_loc), breaks = calculated_breaks, labels = mylabels, trans = 'reverse')
+  } else {
+    gene_model_pl <- gene_model_pl + scale_x_continuous( expand = c(0, 0), limits = c(start_loc, end_loc), breaks = calculated_breaks, labels = mylabels)
+  }
+
   gene_model_pl <- gene_model_pl + ylim(c(0, max_y))
   gene_model_pl <- gene_model_pl + theme_bw() + theme(panel.background = element_blank(),
                                                       panel.border = element_blank(),
@@ -964,11 +1064,6 @@ plot_genome <- function(transcript, exon, five_UTR, three_UTR,
                                                       plot.margin=unit(marginvec_mm,"mm"))
   gene_model_pl <- gene_model_pl + labs(list(x = NULL, y = 'genes'))
 
-  # start: not yet tested #
-  if(reverse_strand == TRUE) {
-    gene_model_pl <- gene_model_pl + scale_x_reverse()
-  }
-  # stop: not yet tested #
 
   if(print_plot == T) print(gene_model_pl)
 
@@ -976,7 +1071,6 @@ plot_genome <- function(transcript, exon, five_UTR, three_UTR,
 
 
 }
-
 
 
 
@@ -1051,7 +1145,9 @@ Genomic_tracks_plot <- function(format_vec, figure_list, uniq_name_vec, color_ve
                                 model_show_partial_overlap = T,
                                 transcript, exon, five_UTR, three_UTR,
                                 breaks_wanted = 4,  label_size = 10,
-                                exon_size = 2, UTR_size = 1.5,
+                                exon_size = 0.5, UTR_size = 0.5,
+                                y_coord_gene_dist = 0.5, y_top_space = 2,
+                                y_genename_space = 1, genename_size = 4,
                                 # RNA bedgraph specific params
                                 rna_bdg_binsize = 100,
                                 rna_bdg_y_title = 'RPM/bp',
@@ -1223,6 +1319,8 @@ Genomic_tracks_plot <- function(format_vec, figure_list, uniq_name_vec, color_ve
                              breaks_wanted = breaks_wanted,
                              show_partial_overlap = model_show_partial_overlap, marginvec_mm = marginvec_mm,
                              exon_size = exon_size, UTR_size = UTR_size,
+                             y_coord_gene_dist = y_coord_gene_dist, y_top_space = y_top_space,
+                             y_genename_space = y_genename_space, genename_size = genename_size,
                              reverse_strand = reverse_strand,
                              show_labels = show_labels, print_plot = print_plot)
 

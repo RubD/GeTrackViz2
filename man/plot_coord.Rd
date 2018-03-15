@@ -5,8 +5,8 @@
 \title{genomic coordinate plotter}
 \usage{
 plot_coord(mychr, start_loc, end_loc, breaks_wanted = 4, label_size = 6,
-  axis_line_size = 0.5, marginvec_mm = c(0, 0, 0, 0), show_labels = T,
-  print_plot = F)
+  axis_line_size = 0.5, marginvec_mm = c(0, 0, 0, 0),
+  reverse_strand = FALSE, show_labels = T, print_plot = F)
 }
 \arguments{
 \item{mychr}{chromosome}

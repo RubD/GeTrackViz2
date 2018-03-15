@@ -8,8 +8,8 @@ plot_bedgraph(bdg, name_bdg, color_bdg, mychr, start_loc, end_loc,
   binsize = 100, breaks_wanted = 4, y_title = "RPM/bp",
   chrom_col = "chr", start_col = "start", end_col = "end",
   counts_col = "RPKM", forced_y_min = NULL, forced_y_max = NULL,
-  axis_line_size = 0.2, marginvec_mm = c(0, 0, 0, 0), show_labels = F,
-  print_plot = F)
+  axis_line_size = 0.2, marginvec_mm = c(0, 0, 0, 0),
+  reverse_strand = FALSE, show_labels = F, print_plot = F)
 }
 \arguments{
 \item{bdg}{bedgraph file for DNA coverage data}

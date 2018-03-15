@@ -10,7 +10,8 @@ plot_RNA_bedgraph(rna_bdg, name_rna_bdg, color_rna_bdg, mychr, start_loc,
   counts_col = "RPKM", strand_col = NA, min_strand_sign = "-",
   plus_strand_sign = "+", make_minus_strand_negative = T,
   forced_y_min = NULL, forced_y_max = NULL, axis_line_size = 0.2,
-  marginvec_mm = c(0, 0, 0, 0), show_labels = F, print_plot = F)
+  marginvec_mm = c(0, 0, 0, 0), use_barplot = F, alpha_fill = 0.7,
+  reverse_strand = FALSE, show_labels = F, print_plot = F)
 }
 \arguments{
 \item{rna_bdg}{bedgraph file for RNA expression data}

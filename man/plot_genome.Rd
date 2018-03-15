@@ -6,8 +6,10 @@
 \usage{
 plot_genome(transcript, exon, five_UTR, three_UTR, mychr = "chr14",
   start_loc = 61100000, end_loc = 61195000, breaks_wanted = 4,
-  show_partial_overlap = T, marginvec_mm = c(0, 0, 0, 0), show_labels = T,
-  print_plot = T)
+  show_partial_overlap = T, marginvec_mm = c(0, 0, 0, 0),
+  y_coord_gene_dist = 0.5, y_top_space = 2, y_genename_space = 1,
+  genename_size = 4, exon_size = 0.5, UTR_size = 0.5,
+  reverse_strand = FALSE, show_labels = T, print_plot = T)
 }
 \arguments{
 \item{transcript}{transcript in bed format}
@@ -29,6 +31,14 @@ plot_genome(transcript, exon, five_UTR, three_UTR, mychr = "chr14",
 \item{show_partial_overlap}{include loops that do not entirely overlap the coordinates}
 
 \item{marginvec_mm}{margin around plot, default = c(0,0,0,0)}
+
+\item{y_coord_gene_dist}{distance between genes}
+
+\item{y_top_space}{additional space on top}
+
+\item{y_genename_space}{space between gene name and gene model}
+
+\item{genename_size}{size of gene name}
 
 \item{show_labels}{boolean: show x-axis lables}
 

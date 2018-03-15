@@ -7,8 +7,8 @@
 plot_loops(bedpe, name_bedpe, color_bedpe, mychr, start_loc, end_loc,
   breaks_wanted = 4, y_title = "prob", chrom_col = "chr",
   start_col = "start", end_col = "end", show_partial_overlap = T,
-  axis_line_size = 0.2, marginvec_mm = c(0, 0, 0, 0), show_labels = F,
-  print_plot = F)
+  axis_line_size = 0.2, marginvec_mm = c(0, 0, 0, 0),
+  reverse_strand = FALSE, show_labels = F, print_plot = F)
 }
 \arguments{
 \item{bedpe}{bedpe file for DNA loops or interaction data}
