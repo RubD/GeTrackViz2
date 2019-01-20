@@ -205,7 +205,7 @@ plot_RNA_bedgraph <- function(rna_bdg, name_rna_bdg, color_rna_bdg, mychr, start
                                   breaks = calculated_breaks, labels = mylabels)
     pl <- pl + scale_y_continuous(breaks = y_breaks, labels = my_y_labels)
     pl <- pl + coord_cartesian(ylim=c(my_y_min, my_y_max))
-    pl <- pl + labs(list(x = NULL, y = full_title))
+    pl <- pl + labs(x = NULL, y = full_title)
 
 
     if(print_plot == T) print(pl)
@@ -318,7 +318,7 @@ plot_RNA_bedgraph <- function(rna_bdg, name_rna_bdg, color_rna_bdg, mychr, start
                                   breaks = calculated_breaks, labels = mylabels)
     pl <- pl + scale_y_continuous(breaks = y_breaks, labels = my_y_labels)
     pl <- pl + coord_cartesian(ylim=c(my_y_min, my_y_max))
-    pl <- pl + labs(list(x = NULL, y = full_title))
+    pl <- pl + labs(x = NULL, y = full_title)
 
 
     if(print_plot == T) print(pl)
@@ -480,7 +480,7 @@ plot_bedgraph <- function(bdg, name_bdg, color_bdg,
                                 breaks = calculated_breaks, labels = mylabels)
   pl <- pl + scale_y_continuous(breaks = y_breaks, labels = my_y_labels)
   pl <- pl + coord_cartesian(ylim=c(my_y_min, my_y_max))
-  pl <- pl + labs(list(x = NULL, y = full_title))
+  pl <- pl + labs(x = NULL, y = full_title)
 
   if(print_plot == T) print(pl)
 
@@ -685,7 +685,11 @@ plot_loops = function (bedpe, name_bedpe, color_bedpe,
     mylabels <- rep("", length(calculated_breaks))
   }
   max_y = max(bedpe_subset$segm_y_values) + 1
+
+  # create y-title
   full_title = paste0(name_bedpe, "\n", y_title)
+
+
   int_pl <- ggplot()
   int_pl <- int_pl + geom_segment(data = bedpe_subset, aes(x = end_left_anchor,
                                                            y = segm_y_values, xend = start_right_anchor, yend = segm_y_values),
@@ -705,7 +709,7 @@ plot_loops = function (bedpe, name_bedpe, color_bedpe,
                                         axis.text.x = element_text(angle = 45, hjust = 45, vjust = 45),
                                         axis.text.y = element_blank(), axis.ticks.y = element_blank(),
                                         plot.margin = unit(marginvec_mm, "mm"))
-  int_pl <- int_pl + labs(list(x = NULL, y = full_title))
+  int_pl <- int_pl + labs(x = NULL, y = full_title)
   if (reverse_strand == TRUE) {
     int_pl <- int_pl + scale_x_reverse()
   }
@@ -818,7 +822,7 @@ plot_bed <- function(bed, name_bed, color_bed, size_bed = 1,
                                         axis.text.y = element_blank(),
                                         axis.ticks.y = element_blank(),
                                         plot.margin=unit(marginvec_mm,"mm"))
-  bed_pl <- bed_pl + labs(list(x = NULL, y = full_title))
+  bed_pl <- bed_pl + labs(x = NULL, y = full_title)
 
   # start: not yet tested #
   if(reverse_strand == TRUE) {
