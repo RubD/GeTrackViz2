@@ -124,12 +124,6 @@ Genomic_tracks_plot(format_vec, figure_list, uniq_name_vec, color_vec,
 \item{show_labels}{boolean: show x-axis lables}
 
 \item{print_plot}{boolean: print individual plot}
-
-\item{loop_chrom_col}{= 'chr',}
-
-\item{loop_start_col}{= 'start',}
-
-\item{loop_end_col}{= 'end',}
 }
 \value{
 ggplot object

@@ -1494,12 +1494,12 @@ Genomic_tracks_plot <- function(format_vec, figure_list, uniq_name_vec, color_ve
   }
 
   # return together
-  final_plot <- plot_grid(plotlist = save_figure_list, ...)
 
-  if(print_plot == T) print(final_plot)
-
-  return(final_plot)
-
+  if(print_plot == T) {
+    final_plot <- cowplot::plot_grid(plotlist = save_figure_list, ...)
+    print(final_plot)
+  }
+  return(save_figure_list)
 
 }
 
