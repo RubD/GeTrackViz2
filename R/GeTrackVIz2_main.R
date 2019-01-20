@@ -21,6 +21,9 @@
 #' @param forced_y_max hard maximum y-axis value
 #' @param axis_line_size line size of x-axis
 #' @param marginvec_mm margin around plot, default = c(0,0,0,0)
+#' @param use_barplot plot track as barplot, default = F
+#' @param alpha_fill alpha for lineplot, default = 1
+#' @param reverse_strand boolean: flip strand x-axis direction
 #' @param show_labels boolean: show x-axis lables
 #' @param print_plot boolean: print individual plot
 #' @import ggplot2 data.table
@@ -352,6 +355,9 @@ plot_RNA_bedgraph <- function(rna_bdg, name_rna_bdg, color_rna_bdg, mychr, start
 #' @param forced_y_max hard maximum y-axis value
 #' @param axis_line_size line size of x-axis
 #' @param marginvec_mm margin around plot, default = c(0,0,0,0)
+#' @param use_barplot plot track as barplot, default = F
+#' @param alpha_fill alpha for lineplot, default = 1
+#' @param reverse_strand boolean: flip strand x-axis direction
 #' @param show_labels boolean: show x-axis lables
 #' @param print_plot boolean: print individual plot
 #' @import ggplot2 data.table
@@ -368,6 +374,7 @@ plot_bedgraph <- function(bdg, name_bdg, color_bdg,
                           chrom_col = 'chr', start_col = 'start', end_col = 'end', counts_col = 'RPKM',
                           forced_y_min = NULL, forced_y_max = NULL,
                           axis_line_size = 0.2, marginvec_mm = c(0,0,0,0),
+                          use_barplot = F, alpha_fill = 1,
                           reverse_strand = FALSE,
                           show_labels = F, print_plot = F) {
 
@@ -431,11 +438,38 @@ plot_bedgraph <- function(bdg, name_bdg, color_bdg,
 
   # create plot
   pl <- ggplot()
-  if(reverse_strand == TRUE) {
-    pl <- pl + geom_bar(data = overlap, aes(x = rev(region_center), y = V1), stat = 'identity', width = 1, color = color_bdg)
+
+
+  ## TEST lineplot for DNA bedgraph data ##
+  # choose barplot vs lineplot
+  if(use_barplot == TRUE) {
+
+    if(reverse_strand == TRUE) {
+      pl <- pl + geom_bar(data = overlap, aes(x = rev(region_center), y = V1), stat = 'identity', width = 1, color = color_bdg)
+    } else {
+      pl <- pl + geom_bar(data = overlap, aes(x = region_center, y = V1), stat = 'identity', width = 1, color = color_bdg)
+    }
+
   } else {
-    pl <- pl + geom_bar(data = overlap, aes(x = region_center, y = V1), stat = 'identity', width = 1, color = color_bdg)
+
+    if(reverse_strand == TRUE) {
+      pl <- pl + geom_line(data = overlap, aes(x = rev(region_center), y = V1), stat = 'identity', color = color_bdg)
+      pl <- pl + geom_ribbon(data = overlap, aes(x = rev(region_center), ymax = V1, ymin = 0), fill = color_bdg, alpha = alpha_fill)
+    } else {
+      pl <- pl + geom_line(data = overlap, aes(x = region_center, y = V1), stat = 'identity', color = color_bdg)
+      pl <- pl + geom_ribbon(data = overlap, aes(x = region_center, ymax = V1, ymin = 0), fill = color_bdg, alpha = alpha_fill)
+    }
+
   }
+
+  ## END TEST ##
+
+  #if(reverse_strand == TRUE) {
+  #  pl <- pl + geom_bar(data = overlap, aes(x = rev(region_center), y = V1), stat = 'identity', width = 1, color = color_bdg)
+  #} else {
+  #  pl <- pl + geom_bar(data = overlap, aes(x = region_center, y = V1), stat = 'identity', width = 1, color = color_bdg)
+  #}
+
   pl <- pl + theme_bw() + theme(panel.background = element_blank(),
                                 panel.border = element_blank(),
                                 axis.line = element_line(color = 'black', size = axis_line_size),
@@ -457,7 +491,7 @@ plot_bedgraph <- function(bdg, name_bdg, color_bdg,
 
 
 
-#' @title loops or interactions plotter
+#' @title Deprecated: loops or interactions plotter
 #' @description This function plots data in bedpe format
 #' @param bedpe bedpe file for DNA loops or interaction data
 #' @param name_bedpe name of sample
@@ -483,7 +517,7 @@ plot_bedgraph <- function(bdg, name_bdg, color_bdg,
 #'
 #'
 #' @export
-plot_loops <- function(bedpe, name_bedpe, color_bedpe,
+plot_loops_old <- function(bedpe, name_bedpe, color_bedpe,
                        mychr, start_loc, end_loc,
                        breaks_wanted = 4, y_title = 'prob',
                        chrom_col = 'chr', start_col = 'start', end_col = 'end',
@@ -588,6 +622,100 @@ plot_loops <- function(bedpe, name_bedpe, color_bedpe,
 
 
 
+#' @title loops or interactions plotter
+#' @description This function plots data in bedpe format
+#' @param bedpe bedpe file for DNA loops or interaction data
+#' @param name_bedpe name of sample
+#' @param color_bedpe color of track
+#' @param mychr chromosome
+#' @param start_loc start location on chromomse
+#' @param end_loc end location on chromosome
+#' @param breaks_wanted number of breaks on x-axis
+#' @param y_title title for y-axis
+#' @param show_partial_overlap include loops that do not entirely overlap the coordinates
+#' @param axis_line_size line size of x-axis
+#' @param marginvec_mm margin around plot, default = c(0,0,0,0)
+#' @param reverse_strand reverse the x-axis, default = FALSE
+#' @param show_labels boolean: show x-axis lables
+#' @param print_plot boolean: print individual plot
+#' @import ggplot2 data.table
+#' @return ggplot object
+#' @keywords loops, bedpe
+#' @examples
+#'     plot_loops(bedpe)
+#'
+#'
+#' @export
+plot_loops = function (bedpe, name_bedpe, color_bedpe,
+                       mychr, start_loc, end_loc,
+                       breaks_wanted = 4,
+                       y_title = "prob",
+                       show_partial_overlap = T,
+                       axis_line_size = 0.2,
+                       marginvec_mm = c(0, 0, 0, 0),
+                       reverse_strand = FALSE,
+                       show_labels = F,
+                       print_plot = F)
+{
+  colnames(bedpe)[1:8] <- c('left_chrom', 'start_left_anchor', 'end_left_anchor',
+                            'right_chrom', 'start_right_anchor', 'end_right_anchor',
+                            'name_loop', 'counts')
+
+  # 1. select all loops that are overlapping with the selected region
+  bedpe_subset <- bedpe[left_chrom == mychr & start_left_anchor <= end_loc & end_right_anchor >=  start_loc]
+
+  # 2. show loops that only partially overlap OR that completely overlap but for which the anchors are outside the selected region
+  if (show_partial_overlap == TRUE) {
+    bedpe_subset[, start_left_anchor := ifelse(start_left_anchor < start_loc, start_loc, start_left_anchor)]
+    bedpe_subset[, end_left_anchor := ifelse(end_left_anchor < start_loc, start_loc, end_left_anchor)]
+
+    bedpe_subset[, start_right_anchor := ifelse(start_right_anchor > end_loc, end_loc, start_right_anchor)]
+    bedpe_subset[, end_right_anchor := ifelse(end_right_anchor > end_loc, end_loc, end_right_anchor)]
+
+  } else {
+    bedpe_subset = bedpe_subset[start_left_anchor >= start_loc & end_right_anchor <= end_loc]
+  }
+
+  bedpe_subset[, `:=`(segm_y_values, 1:nrow(bedpe_subset))]
+  calculated_breaks <- seq(start_loc, end_loc, length.out = breaks_wanted)
+  if (show_labels == T) {
+    mylabels <- paste0(round(calculated_breaks/1000, digits = 0),
+                       "kb")
+  }
+  else {
+    mylabels <- rep("", length(calculated_breaks))
+  }
+  max_y = max(bedpe_subset$segm_y_values) + 1
+  full_title = paste0(name_bedpe, "\n", y_title)
+  int_pl <- ggplot()
+  int_pl <- int_pl + geom_segment(data = bedpe_subset, aes(x = end_left_anchor,
+                                                           y = segm_y_values, xend = start_right_anchor, yend = segm_y_values),
+                                  color = color_bedpe)
+  int_pl <- int_pl + geom_segment(data = bedpe_subset, aes(x = start_left_anchor,
+                                                           y = segm_y_values, xend = end_left_anchor, yend = segm_y_values),
+                                  size = 1.2, color = color_bedpe)
+  int_pl <- int_pl + geom_segment(data = bedpe_subset, aes(x = start_right_anchor,
+                                                           y = segm_y_values, xend = end_right_anchor, yend = segm_y_values),
+                                  size = 1.2, color = color_bedpe)
+  int_pl <- int_pl + scale_x_continuous(expand = c(0, 0), limits = c(start_loc,
+                                                                     end_loc), breaks = calculated_breaks, labels = mylabels)
+  int_pl <- int_pl + ylim(c(0, max_y))
+  int_pl <- int_pl + theme_bw() + theme(panel.background = element_blank(),
+                                        panel.border = element_blank(), axis.line = element_line(color = "black",
+                                                                                                 size = axis_line_size), panel.grid = element_blank(),
+                                        axis.text.x = element_text(angle = 45, hjust = 45, vjust = 45),
+                                        axis.text.y = element_blank(), axis.ticks.y = element_blank(),
+                                        plot.margin = unit(marginvec_mm, "mm"))
+  int_pl <- int_pl + labs(list(x = NULL, y = full_title))
+  if (reverse_strand == TRUE) {
+    int_pl <- int_pl + scale_x_reverse()
+  }
+  if (print_plot == T)
+    print(int_pl)
+  return(int_pl)
+}
+
+
 
 
 #' @title bed region plotter
@@ -615,7 +743,7 @@ plot_loops <- function(bedpe, name_bedpe, color_bedpe,
 #'
 #'
 #' @export
-plot_bed <- function(bed, name_bed, color_bed, size_bed,
+plot_bed <- function(bed, name_bed, color_bed, size_bed = 1,
                      mychr, start_loc, end_loc,
                      breaks_wanted = 4, y_title = 'SE',
                      show_partial_overlap = T,
@@ -1201,6 +1329,30 @@ Genomic_tracks_plot <- function(format_vec, figure_list, uniq_name_vec, color_ve
   }
 
 
+
+
+  ## START TEST ##
+  # to create different limits for each rna bedgraph
+  if(!is.null(rna_bdg_forced_y_min_vec)) {
+    min_limit_vec_names <- names(format_vec[format_vec == 'rna'])
+    names(rna_bdg_forced_y_min_vec) <- min_limit_vec_names
+    print(rna_bdg_forced_y_min_vec)
+  }
+
+
+  if(!is.null(rna_bdg_forced_y_max_vec)) {
+    max_limit_vec_names <- names(format_vec[format_vec == 'rna'])
+    names(rna_bdg_forced_y_max_vec) <- max_limit_vec_names
+    print(rna_bdg_forced_y_max_vec)
+  }
+
+  ## STOP TEST ##
+
+
+
+
+
+
   save_figure_list <- list()
 
   for(plot in 1:length(uniq_name_vec)) {
@@ -1219,17 +1371,19 @@ Genomic_tracks_plot <- function(format_vec, figure_list, uniq_name_vec, color_ve
       cat('\n for ',plotname,' create RNA bedgraph \n \n')
 
 
-      if(!is.null(bdg_forced_y_min_vec)) {
-        bdg_forced_y_min = bdg_forced_y_min_vec[[plotname]]
+      if(!is.null(rna_bdg_forced_y_min_vec)) {
+        rna_bdg_forced_y_min = rna_bdg_forced_y_min_vec[[plotname]]
+        print(rna_bdg_forced_y_min)
       } else {
-        bdg_forced_y_min = NULL
+        rna_bdg_forced_y_min = NULL
       }
 
 
-      if(!is.null(bdg_forced_y_max_vec)) {
-        bdg_forced_y_max = bdg_forced_y_max_vec[[plotname]]
+      if(!is.null(rna_bdg_forced_y_max_vec)) {
+        rna_bdg_forced_y_max = rna_bdg_forced_y_max_vec[[plotname]]
+        print(rna_bdg_forced_y_max)
       } else {
-        bdg_forced_y_max = NULL
+        rna_bdg_forced_y_max = NULL
       }
 
 
@@ -1242,7 +1396,7 @@ Genomic_tracks_plot <- function(format_vec, figure_list, uniq_name_vec, color_ve
                                    counts_col = rna_bdg_counts_col, strand_col = rna_bdg_strand_col,
                                    min_strand_sign = rna_min_strand_sign, plus_strand_sign = rna_plus_strand_sign,
                                    make_minus_strand_negative = rna_make_minus_strand_negative,
-                                   forced_y_min = rna_bdg_forced_y_min_vec, forced_y_max = rna_bdg_forced_y_max_vec,
+                                   forced_y_min = rna_bdg_forced_y_min, forced_y_max = rna_bdg_forced_y_max,
                                    axis_line_size = rna_bdg_axis_line_size, marginvec_mm = marginvec_mm,
                                    show_labels = show_labels, print_plot = print_plot,
                                    reverse_strand = reverse_strand)

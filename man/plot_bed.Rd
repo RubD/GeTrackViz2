@@ -4,10 +4,11 @@
 \alias{plot_bed}
 \title{bed region plotter}
 \usage{
-plot_bed(bed, name_bed, color_bed, size_bed, mychr, start_loc, end_loc,
-  breaks_wanted = 4, y_title = "SE", show_partial_overlap = T,
-  same_y_level = T, axis_line_size = 1, marginvec_mm = c(0, 0, 0, 0),
-  reverse_strand = FALSE, show_labels = F, print_plot = F)
+plot_bed(bed, name_bed, color_bed, size_bed = 1, mychr, start_loc,
+  end_loc, breaks_wanted = 4, y_title = "SE",
+  show_partial_overlap = T, same_y_level = T, axis_line_size = 1,
+  marginvec_mm = c(0, 0, 0, 0), reverse_strand = FALSE,
+  show_labels = F, print_plot = F)
 }
 \arguments{
 \item{bed}{bedpe file for DNA loops or interaction data}

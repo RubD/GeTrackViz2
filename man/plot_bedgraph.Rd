@@ -9,7 +9,8 @@ plot_bedgraph(bdg, name_bdg, color_bdg, mychr, start_loc, end_loc,
   chrom_col = "chr", start_col = "start", end_col = "end",
   counts_col = "RPKM", forced_y_min = NULL, forced_y_max = NULL,
   axis_line_size = 0.2, marginvec_mm = c(0, 0, 0, 0),
-  reverse_strand = FALSE, show_labels = F, print_plot = F)
+  use_barplot = F, alpha_fill = 1, reverse_strand = FALSE,
+  show_labels = F, print_plot = F)
 }
 \arguments{
 \item{bdg}{bedgraph file for DNA coverage data}
@@ -45,6 +46,12 @@ plot_bedgraph(bdg, name_bdg, color_bdg, mychr, start_loc, end_loc,
 \item{axis_line_size}{line size of x-axis}
 
 \item{marginvec_mm}{margin around plot, default = c(0,0,0,0)}
+
+\item{use_barplot}{plot track as barplot, default = F}
+
+\item{alpha_fill}{alpha for lineplot, default = 1}
+
+\item{reverse_strand}{boolean: flip strand x-axis direction}
 
 \item{show_labels}{boolean: show x-axis lables}
 

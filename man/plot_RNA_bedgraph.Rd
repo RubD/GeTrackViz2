@@ -56,6 +56,12 @@ plot_RNA_bedgraph(rna_bdg, name_rna_bdg, color_rna_bdg, mychr, start_loc,
 
 \item{marginvec_mm}{margin around plot, default = c(0,0,0,0)}
 
+\item{use_barplot}{plot track as barplot, default = F}
+
+\item{alpha_fill}{alpha for lineplot, default = 1}
+
+\item{reverse_strand}{boolean: flip strand x-axis direction}
+
 \item{show_labels}{boolean: show x-axis lables}
 
 \item{print_plot}{boolean: print individual plot}
