@@ -4,9 +4,10 @@
 \alias{plot_loops}
 \title{loops or interactions plotter}
 \usage{
-plot_loops(bedpe, name_bedpe, color_bedpe, mychr, start_loc, end_loc,
-  breaks_wanted = 4, y_title = "prob", show_partial_overlap = T,
-  axis_line_size = 0.2, marginvec_mm = c(0, 0, 0, 0),
+plot_loops(bedpe, name_bedpe, color_column = NULL,
+  color_bedpe = "black", mychr, start_loc, end_loc, breaks_wanted = 4,
+  y_title = "prob", show_partial_overlap = T, anchor_width = 1.3,
+  loop_width = 1, axis_line_size = 0.2, marginvec_mm = c(0, 0, 0, 0),
   reverse_strand = FALSE, show_labels = F, print_plot = F)
 }
 \arguments{

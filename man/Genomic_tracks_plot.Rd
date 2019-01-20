@@ -24,6 +24,7 @@ Genomic_tracks_plot(format_vec, figure_list, uniq_name_vec, color_vec,
   bdg_start_col = "start", bdg_end_col = "end",
   bdg_counts_col = "RPKM", loop_y_title = "prob",
   loop_show_partial_overlap = T, loops_axis_line_size = 0.2,
+  loops_color_column = NULL, loops_color_bedpe = "black",
   bed_y_title = "SE", bed_size_bed = 4, bed_show_partial_overlap = T,
   bed_same_y_level = T, bed_axis_line_size = 1, show_labels = F,
   print_plot = T, ...)
@@ -110,6 +111,10 @@ Genomic_tracks_plot(format_vec, figure_list, uniq_name_vec, color_vec,
 \item{loop_show_partial_overlap}{= T,}
 
 \item{loops_axis_line_size}{= 0.2,}
+
+\item{loops_color_column}{= NULL,}
+
+\item{loops_color_bedpe}{= 'black',}
 
 \item{bed_y_title}{= 'SE',}
 

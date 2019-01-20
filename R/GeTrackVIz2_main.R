@@ -490,138 +490,6 @@ plot_bedgraph <- function(bdg, name_bdg, color_bdg,
 
 
 
-
-#' @title Deprecated: loops or interactions plotter
-#' @description This function plots data in bedpe format
-#' @param bedpe bedpe file for DNA loops or interaction data
-#' @param name_bedpe name of sample
-#' @param color_bedpe color of track
-#' @param mychr chromosome
-#' @param start_loc start location on chromomse
-#' @param end_loc end location on chromosome
-#' @param breaks_wanted number of breaks on x-axis
-#' @param y_title title for y-axis
-#' @param chrom_col column name for chromosomes
-#' @param start_col column name for start
-#' @param end_col column name for end
-#' @param show_partial_overlap include loops that do not entirely overlap the coordinates
-#' @param axis_line_size line size of x-axis
-#' @param marginvec_mm margin around plot, default = c(0,0,0,0)
-#' @param show_labels boolean: show x-axis lables
-#' @param print_plot boolean: print individual plot
-#' @import ggplot2 data.table
-#' @return ggplot object
-#' @keywords loops, bedpe
-#' @examples
-#'     plot_loops_old(bedpe)
-#'
-#'
-#' @export
-plot_loops_old <- function(bedpe, name_bedpe, color_bedpe,
-                       mychr, start_loc, end_loc,
-                       breaks_wanted = 4, y_title = 'prob',
-                       chrom_col = 'chr', start_col = 'start', end_col = 'end',
-                       show_partial_overlap = T,
-                       axis_line_size = 0.2, marginvec_mm = c(0,0,0,0),
-                       reverse_strand = FALSE,
-                       show_labels = F, print_plot = F) {
-
-
-  # bedpe configuration is currently strict
-  colnames(bedpe) <- paste0('V', 1:ncol(bedpe))
-
-  # get start and end locations of anchor regions
-  bedpe[, start_left_anchor := V2]
-  bedpe[, end_left_anchor := V2 + as.numeric(strsplit(V11, split = ',')[[1]][1]), by = 1:nrow(bedpe)]
-
-  bedpe[, start_right_anchor := V3 - as.numeric(strsplit(V11, split = ',')[[1]][2]), by = 1:nrow(bedpe)]
-  bedpe[, end_right_anchor := V3]
-
-
-  # take subset
-  bedpe_subset <- bedpe[V1 == mychr & V2 >= start_loc & V3 <= end_loc]
-
-  if(show_partial_overlap == TRUE) {
-
-    # only the start of loop is within selected genomic region
-    bedpe_subset_startOnly <- bedpe[V1 == mychr & V2 >= start_loc & V2 <= end_loc]
-    bedpe_subset_startOnly <- bedpe_subset_startOnly[!V4 %in% bedpe_subset$V4]
-    bedpe_subset_startOnly[, V3 := end_loc]
-    bedpe_subset_startOnly[, end_right_anchor := ifelse(start_right_anchor <= end_loc, end_loc, end_right_anchor)]
-
-    # only the end of loop is within selected genomic region
-    bedpe_subset_endOnly <- bedpe[V1 == mychr & V3 >= start_loc & V3 <= end_loc]
-    bedpe_subset_endOnly <- bedpe_subset_endOnly[!V4 %in% bedpe_subset$V4]
-    bedpe_subset_endOnly[, V2 := start_loc]
-    bedpe_subset_endOnly[, start_left_anchor := ifelse(end_left_anchor >= start_loc, start_loc, start_left_anchor)]
-
-    # merge together
-    bedpe_all_overlapping_subset <- do.call('rbind', list(bedpe_subset, bedpe_subset_startOnly, bedpe_subset_endOnly))
-    bedpe_subset <- bedpe_all_overlapping_subset
-  }
-
-
-
-
-  # give y-values
-  bedpe_subset[, segm_y_values := 1:nrow(bedpe_subset)]
-
-
-  # create breaks
-  calculated_breaks <- seq(start_loc, end_loc, length.out = breaks_wanted)
-
-  if(show_labels == T) {
-    mylabels <- paste0(round(calculated_breaks/1000, digits = 0), 'kb')
-  } else {
-    mylabels <- rep('', length(calculated_breaks))
-  }
-
-  # maximum y
-  max_y = max(bedpe_subset$segm_y_values)+1
-
-  # create y title
-  full_title = paste0(name_bedpe, '\n', y_title)
-
-
-  int_pl <- ggplot()
-  int_pl <- int_pl + geom_segment(data = bedpe_subset,
-                                  aes(x = end_left_anchor, y = segm_y_values, xend = start_right_anchor, yend = segm_y_values),
-                                  color = color_bedpe)
-  int_pl <- int_pl + geom_segment(data = bedpe_subset,
-                                  aes(x = start_left_anchor, y = segm_y_values, xend = end_left_anchor, yend = segm_y_values),
-                                  size = 1.2, color = color_bedpe)
-  int_pl <- int_pl + geom_segment(data = bedpe_subset,
-                                  aes(x = start_right_anchor, y = segm_y_values, xend = end_right_anchor, yend = segm_y_values),
-                                  size = 1.2, color = color_bedpe)
-
-  int_pl <- int_pl + scale_x_continuous(expand = c(0, 0), limits = c(start_loc, end_loc),
-                                        breaks = calculated_breaks, labels = mylabels)
-  int_pl <- int_pl + ylim(c(0,max_y))
-  int_pl <- int_pl + theme_bw() + theme(panel.background = element_blank(),
-                                        panel.border = element_blank(),
-                                        axis.line = element_line(color = 'black', size = axis_line_size),
-                                        panel.grid = element_blank(),
-                                        axis.text.x = element_text(angle = 45, hjust = 45, vjust = 45),
-                                        axis.text.y = element_blank(),
-                                        axis.ticks.y = element_blank(),
-                                        plot.margin=unit(marginvec_mm,"mm"))
-  int_pl <- int_pl + labs(list(x = NULL, y = full_title))
-
-  # start: not yet tested #
-  if(reverse_strand == TRUE) {
-    int_pl <- int_pl + scale_x_reverse()
-  }
-  # stop: not yet tested #
-
-  if(print_plot == T) print(int_pl)
-
-  return(int_pl)
-
-}
-
-
-
-
 #' @title loops or interactions plotter
 #' @description This function plots data in bedpe format
 #' @param bedpe bedpe file for DNA loops or interaction data
@@ -646,19 +514,31 @@ plot_loops_old <- function(bedpe, name_bedpe, color_bedpe,
 #'
 #'
 #' @export
-plot_loops = function (bedpe, name_bedpe, color_bedpe,
+plot_loops = function (bedpe, name_bedpe,
+                       color_column = NULL, color_bedpe = 'black',
                        mychr, start_loc, end_loc,
                        breaks_wanted = 4,
                        y_title = "prob",
                        show_partial_overlap = T,
+                       anchor_width = 1.3, loop_width = 1,
                        axis_line_size = 0.2,
                        marginvec_mm = c(0, 0, 0, 0),
                        reverse_strand = FALSE,
                        show_labels = F,
                        print_plot = F) {
+
   colnames(bedpe)[1:8] <- c('left_chrom', 'start_left_anchor', 'end_left_anchor',
                             'right_chrom', 'start_right_anchor', 'end_right_anchor',
                             'name_loop', 'counts')
+
+  # if no color column is selected, create one, otherwise rename that column
+  if(is.null(color_column)) {
+    bedpe[, color_col := 'no_color_selected']
+    color_loop_vector = c('no_color_selected' = color_bedpe)
+  } else {
+    setnames(bedpe, old = color_column, new = 'color_col')
+    color_loop_vector = color_bedpe
+  }
 
   # 1. select all loops that are overlapping with the selected region
   bedpe_subset <- bedpe[left_chrom == mychr & start_left_anchor <= end_loc & end_right_anchor >=  start_loc]
@@ -678,8 +558,7 @@ plot_loops = function (bedpe, name_bedpe, color_bedpe,
   bedpe_subset[, `:=`(segm_y_values, 1:nrow(bedpe_subset))]
   calculated_breaks <- seq(start_loc, end_loc, length.out = breaks_wanted)
   if (show_labels == T) {
-    mylabels <- paste0(round(calculated_breaks/1000, digits = 0),
-                       "kb")
+    mylabels <- paste0(round(calculated_breaks/1000, digits = 0), "kb")
   }
   else {
     mylabels <- rep("", length(calculated_breaks))
@@ -691,25 +570,34 @@ plot_loops = function (bedpe, name_bedpe, color_bedpe,
 
 
   int_pl <- ggplot()
-  int_pl <- int_pl + geom_segment(data = bedpe_subset, aes(x = end_left_anchor,
-                                                           y = segm_y_values, xend = start_right_anchor, yend = segm_y_values),
-                                  color = color_bedpe)
-  int_pl <- int_pl + geom_segment(data = bedpe_subset, aes(x = start_left_anchor,
-                                                           y = segm_y_values, xend = end_left_anchor, yend = segm_y_values),
-                                  size = 1.2, color = color_bedpe)
-  int_pl <- int_pl + geom_segment(data = bedpe_subset, aes(x = start_right_anchor,
-                                                           y = segm_y_values, xend = end_right_anchor, yend = segm_y_values),
-                                  size = 1.2, color = color_bedpe)
-  int_pl <- int_pl + scale_x_continuous(expand = c(0, 0), limits = c(start_loc,
-                                                                     end_loc), breaks = calculated_breaks, labels = mylabels)
+  # loop between anchors
+  int_pl <- int_pl + geom_segment(data = bedpe_subset, aes(x = end_left_anchor, y = segm_y_values,
+                                                           xend = start_right_anchor, yend = segm_y_values,
+                                                           color = color_col))
+  # left anchor
+  int_pl <- int_pl + geom_segment(data = bedpe_subset, aes(x = start_left_anchor, y = segm_y_values,
+                                                           xend = end_left_anchor, yend = segm_y_values,
+                                                           color = color_col),
+                                  size = anchor_width)
+  # right anchor
+  int_pl <- int_pl + geom_segment(data = bedpe_subset, aes(x = start_right_anchor, y = segm_y_values,
+                                                           xend = end_right_anchor, yend = segm_y_values,
+                                                           color = color_col),
+                                  size = anchor_width)
+  int_pl <- int_pl + scale_color_manual(values = color_loop_vector, guide = F)
+
+  int_pl <- int_pl + scale_x_continuous(expand = c(0, 0), limits = c(start_loc, end_loc),
+                                        breaks = calculated_breaks, labels = mylabels)
   int_pl <- int_pl + ylim(c(0, max_y))
   int_pl <- int_pl + theme_bw() + theme(panel.background = element_blank(),
-                                        panel.border = element_blank(), axis.line = element_line(color = "black",
-                                                                                                 size = axis_line_size), panel.grid = element_blank(),
+                                        panel.border = element_blank(),
+                                        axis.line = element_line(color = "black",  size = axis_line_size),
+                                        panel.grid = element_blank(),
                                         axis.text.x = element_text(angle = 45, hjust = 45, vjust = 45),
                                         axis.text.y = element_blank(), axis.ticks.y = element_blank(),
                                         plot.margin = unit(marginvec_mm, "mm"))
   int_pl <- int_pl + labs(x = NULL, y = full_title)
+
   if (reverse_strand == TRUE) {
     int_pl <- int_pl + scale_x_reverse()
   }
@@ -717,6 +605,7 @@ plot_loops = function (bedpe, name_bedpe, color_bedpe,
     print(int_pl)
   return(int_pl)
 }
+
 
 
 
@@ -1251,6 +1140,8 @@ plot_genome <- function(transcript, exon, five_UTR, three_UTR,
 #' @param loop_y_title = 'prob',
 #' @param loop_show_partial_overlap = T,
 #' @param loops_axis_line_size = 0.2,
+#' @param loops_color_column = NULL,
+#' @param loops_color_bedpe = 'black',
 #' @param bed_y_title = 'SE',
 #' @param bed_size_bed = 4,
 #' @param bed_show_partial_overlap = T,
@@ -1297,6 +1188,8 @@ Genomic_tracks_plot <- function(format_vec, figure_list, uniq_name_vec, color_ve
                                 loop_y_title = 'prob',
                                 loop_show_partial_overlap = T,
                                 loops_axis_line_size = 0.2,
+                                loops_color_column = NULL,
+                                loops_color_bedpe = 'black',
                                 # bed specific params
                                 bed_y_title = 'SE', bed_size_bed = 4,
                                 bed_show_partial_overlap = T, bed_same_y_level = T,
@@ -1440,7 +1333,14 @@ Genomic_tracks_plot <- function(format_vec, figure_list, uniq_name_vec, color_ve
 
       cat('\n for ',plotname,' create bedpe/loops \n \n')
 
-      newplot <- plot_loops(bedpe = plotdata, name_bedpe = plotname, color_bedpe = plotcolor,
+      if(!is.null(loops_color_column)) {
+        plotcolor_loops = loops_color_bedpe
+      } else {
+        plotcolor_loops = plotcolor
+      }
+
+      newplot <- plot_loops(bedpe = plotdata, name_bedpe = plotname,
+                            color_column = loops_color_column, color_bedpe = plotcolor_loops,
                             mychr = mychr, start_loc = start_loc, end_loc = end_loc,
                             breaks_wanted = breaks_wanted, y_title = loop_y_title,
                             show_partial_overlap = loop_show_partial_overlap,
