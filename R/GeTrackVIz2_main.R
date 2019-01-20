@@ -655,8 +655,7 @@ plot_loops = function (bedpe, name_bedpe, color_bedpe,
                        marginvec_mm = c(0, 0, 0, 0),
                        reverse_strand = FALSE,
                        show_labels = F,
-                       print_plot = F)
-{
+                       print_plot = F) {
   colnames(bedpe)[1:8] <- c('left_chrom', 'start_left_anchor', 'end_left_anchor',
                             'right_chrom', 'start_right_anchor', 'end_right_anchor',
                             'name_loop', 'counts')
@@ -714,6 +713,7 @@ plot_loops = function (bedpe, name_bedpe, color_bedpe,
     print(int_pl)
   return(int_pl)
 }
+
 
 
 
