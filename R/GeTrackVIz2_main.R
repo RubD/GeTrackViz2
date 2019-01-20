@@ -1194,7 +1194,7 @@ plot_genome <- function(transcript, exon, five_UTR, three_UTR,
                                                       axis.ticks.y = element_blank(),
                                                       axis.ticks.x = element_blank(),
                                                       plot.margin=unit(marginvec_mm,"mm"))
-  gene_model_pl <- gene_model_pl + labs(list(x = NULL, y = 'genes'))
+  gene_model_pl <- gene_model_pl + labs(x = NULL, y = 'genes')
 
 
   if(print_plot == T) print(gene_model_pl)
