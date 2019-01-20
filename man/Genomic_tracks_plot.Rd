@@ -23,11 +23,10 @@ Genomic_tracks_plot(format_vec, figure_list, uniq_name_vec, color_vec,
   bdg_axis_line_size = 0.2, bdg_chrom_col = "chr",
   bdg_start_col = "start", bdg_end_col = "end",
   bdg_counts_col = "RPKM", loop_y_title = "prob",
-  loop_chrom_col = "chr", loop_start_col = "start",
-  loop_end_col = "end", loop_show_partial_overlap = T,
-  loops_axis_line_size = 0.2, bed_y_title = "SE", bed_size_bed = 4,
-  bed_show_partial_overlap = T, bed_same_y_level = T,
-  bed_axis_line_size = 1, show_labels = F, print_plot = T, ...)
+  loop_show_partial_overlap = T, loops_axis_line_size = 0.2,
+  bed_y_title = "SE", bed_size_bed = 4, bed_show_partial_overlap = T,
+  bed_same_y_level = T, bed_axis_line_size = 1, show_labels = F,
+  print_plot = T, ...)
 }
 \arguments{
 \item{format_vec}{transcript in bed format}
@@ -108,12 +107,6 @@ Genomic_tracks_plot(format_vec, figure_list, uniq_name_vec, color_vec,
 
 \item{loop_y_title}{= 'prob',}
 
-\item{loop_chrom_col}{= 'chr',}
-
-\item{loop_start_col}{= 'start',}
-
-\item{loop_end_col}{= 'end',}
-
 \item{loop_show_partial_overlap}{= T,}
 
 \item{loops_axis_line_size}{= 0.2,}
@@ -131,6 +124,12 @@ Genomic_tracks_plot(format_vec, figure_list, uniq_name_vec, color_vec,
 \item{show_labels}{boolean: show x-axis lables}
 
 \item{print_plot}{boolean: print individual plot}
+
+\item{loop_chrom_col}{= 'chr',}
+
+\item{loop_start_col}{= 'start',}
+
+\item{loop_end_col}{= 'end',}
 }
 \value{
 ggplot object

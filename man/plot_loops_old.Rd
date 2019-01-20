@@ -50,7 +50,7 @@ ggplot object
 This function plots data in bedpe format
 }
 \examples{
-    plot_loops(bedpe)
+    plot_loops_old(bedpe)
 
 
 }

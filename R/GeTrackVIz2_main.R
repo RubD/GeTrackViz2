@@ -513,7 +513,7 @@ plot_bedgraph <- function(bdg, name_bdg, color_bdg,
 #' @return ggplot object
 #' @keywords loops, bedpe
 #' @examples
-#'     plot_loops(bedpe)
+#'     plot_loops_old(bedpe)
 #'
 #'
 #' @export
@@ -1294,7 +1294,6 @@ Genomic_tracks_plot <- function(format_vec, figure_list, uniq_name_vec, color_ve
                                 bdg_chrom_col = 'chr', bdg_start_col = 'start', bdg_end_col = 'end', bdg_counts_col = 'RPKM',
                                 # bedpe specific params
                                 loop_y_title = 'prob',
-                                loop_chrom_col = 'chr', loop_start_col = 'start', loop_end_col = 'end',
                                 loop_show_partial_overlap = T,
                                 loops_axis_line_size = 0.2,
                                 # bed specific params
@@ -1443,7 +1442,6 @@ Genomic_tracks_plot <- function(format_vec, figure_list, uniq_name_vec, color_ve
       newplot <- plot_loops(bedpe = plotdata, name_bedpe = plotname, color_bedpe = plotcolor,
                             mychr = mychr, start_loc = start_loc, end_loc = end_loc,
                             breaks_wanted = breaks_wanted, y_title = loop_y_title,
-                            chrom_col = loop_chrom_col, start_col = loop_start_col, end_col = loop_end_col,
                             show_partial_overlap = loop_show_partial_overlap,
                             axis_line_size = loops_axis_line_size, marginvec_mm = marginvec_mm,
                             reverse_strand = reverse_strand,
