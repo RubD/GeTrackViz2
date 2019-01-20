@@ -902,7 +902,7 @@ plot_coord <- function(mychr, start_loc, end_loc,
                                             axis.text.y = element_blank(),
                                             axis.ticks.y = element_blank(),
                                             plot.margin = unit(marginvec_mm, 'mm'))
-  coord_pl <- coord_pl + labs(list(x = NULL, y = ''))
+  coord_pl <- coord_pl + labs(x = NULL, y = '')
 
 
 
